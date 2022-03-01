@@ -1,0 +1,201 @@
+<html>
+# IMPORT MODULES
+
+import pickle # Used for saving files
+import tkinter as tk # Used for the graphical user interface
+from tkinter import DoubleVar, PhotoImage, ttk, StringVar # Used for the graphical user interface
+from tkinter import * # Used for the graphical user interface
+
+# Create a window object for the gui
+root = tk.Tk()
+
+# Create dictionaries to store information
+army = {} # Used to store army list
+models = {} # Used to store points values of models that can be accessed by army dict
+
+# Creates read-only constant for file opening
+READ_ONLY = "r"
+
+# Opens file that stores the points values and adds the keys and values
+points_val = open("points\\point_values_fec.txt", READ_ONLY) # Opens points value file
+lines = points_val.readlines() # Stores each line of the file in a list
+
+for line in lines: # Loops through each line in the file
+    models.update({line.split("|")[0]: float(line.split("|")[1].strip("\n"))}) # Adds the key and the value and splits them with the character '|'
+
+
+def Convert(string):
+    li = list(string.split(" "))
+    return li
+
+
+def add_model():
+    model = clicked.get()
+    model = Convert(model)
+    model = model[: len(model) - 1]
+    model = " ".join(model)
+    amount = int(amount_slider.get())
+    if model in models:
+        for i in range(amount):
+            if model in army:
+                army.update(
+                    {model: [(models[model]) * (army[model][0] / models[model] + 1)]}
+                )
+            else:
+                army.update({model: [models[model]]})
+            print("Successfully added " + model.title() + "\n")
+    else:
+        print("Invalid model\n")
+    view_army_label.config(text=view_army(army))
+
+
+def remove_model(model):
+
+    if model in army:
+        if army[model][0] == models[model]:
+            army.pop(model)
+        else:
+            army.update({model: [army[model][0] - models[model]]})
+        print("Successfully removed " + model.title() + "\n")
+    else:
+        print("Invalid model\n")
+
+
+def view_army(army):
+    text = ""
+    text = text + "Flesh Eater Courts Army:\n"
+    for item, amount in army.items():
+        text = (
+            text
+            + (
+                "{} {}".format(
+                    item.title()
+                    + " x"
+                    + str(
+                        float(
+                            str(army[item])
+                            .replace("[", "")
+                            .replace("]", "")
+                            .replace(".0", "")
+                        )
+                        / models[item]
+                    ).replace(".0", ""),
+                    amount,
+                )
+            )
+            + "\n"
+        )
+    total_points = 0
+    cur_army = list(army.values())
+
+    for i in range(len(cur_army)):
+        total_points += sum(cur_army[i])
+    text = text + "\nTotal points: " + str(total_points)
+    return text
+
+
+def save_army(name):
+
+    save = open("saves\\" + name + ".pkl", "wb")
+    pickle.dump(army, save)
+    save.close()
+    print("Successfully saved file " + name)
+
+
+def open_army(name):
+
+    try:
+        save = open("saves\\" + name + ".pkl", "rb")
+        army = pickle.load(save)
+        print("Successfully loaded save")
+        save.close()
+        view_army_label.config(text=view_army(army))
+        return army
+    except FileNotFoundError:
+        print("A save under that name cannot be found")
+
+
+def dict_to_list(dict):
+    key = list(dict.keys())
+    value = list(dict.values())
+    final = [" "]
+    for i in range(len(key)):
+        final.append(str(key[i]) + " (" + str(value[i]) + ")")
+    return final
+
+
+def save(e, top):
+    save_army(e.get())
+    top.destroy()
+
+
+def load_(e, top):
+    army = open_army(e.get())
+    top.destroy()
+
+
+def popupwinsave():
+    top = Toplevel(root)
+    top.geometry("250x100")
+
+    entry = Entry(top, width=25)
+    entry.pack()
+    Button(top, text="Save", command=lambda: save(entry, top)).pack(pady=5, side=TOP)
+
+
+def popupwinload():
+    top = Toplevel(root)
+    top.geometry("250x100")
+
+    entry = Entry(top, width=25)
+    entry.pack()
+    Button(top, text="Load", command=lambda: load_(entry, top)).pack(pady=5, side=TOP)
+
+
+print("Welcome to Army Builder\n")
+
+photo = PhotoImage(file="logo.png")
+root.iconphoto(False, photo)
+
+root.title("Army Builder")
+
+#################################################################################
+# USED THIS CODE FROM PYTHONTUTORIAL.NET                                        #
+window_width = 300                                                              #
+window_height = 400                                                             #
+                                                                                #
+screen_width = root.winfo_screenwidth()                                         #
+screen_height = root.winfo_screenheight()                                       #
+                                                                                #
+center_x = int(screen_width / 2 - window_width / 2)                             #
+center_y = int(screen_height / 2 - window_height / 2)                           #
+                                                                                #
+root.geometry(f"{window_width}x{window_height}+{center_x}+{center_y}")          #
+                                                                                #
+#################################################################################
+
+clicked = StringVar()
+amount_of_models = DoubleVar()
+
+lf = ttk.Label(root, text="Flesh Eater Courts Army")
+dropdown = ttk.OptionMenu(root, clicked, *dict_to_list(models))
+button = ttk.Button(root, text="Add model", command=add_model)
+amount_slider = tk.Scale(
+    root, from_=1, to=30, variable=amount_of_models, orient="horizontal"
+)
+view_army_label = ttk.Label(root, text=view_army(army))
+save_button = ttk.Button(root, text="Save army", command=popupwinsave)
+load_button = ttk.Button(root, text="Load army", command=popupwinload)
+lf.pack()
+dropdown.pack()
+amount_slider.pack()
+button.pack()
+view_army_label.pack()
+save_button.pack()
+load_button.pack()
+
+clicked.set("---------")
+
+root.mainloop()
+
+</html>
