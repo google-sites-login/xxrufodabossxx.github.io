@@ -1,6 +1,41 @@
 <html><head><script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script><script async src="https://api.countapi.xyz/hit/google.com/68ea162c-62f8-4d55-8558-f95a3d935b88?callback=websiteVisits"></script></head>
  <body>
-<script>function websiteVisits(response) {
-    document.querySelector("#visits").textContent = response.value;
- }</script><div class="visits" id="visits"></div></body>
+<script>var exp, n1, n2, n3, n4, ops, res;
+n1 = prompt("n1: ");
+n2 = prompt("n2: ");
+n3 = prompt("n3: ");
+n4 = prompt("n4: ");
+res = 0;
+exp = "";
+ops = ["+", "-", "*", "/"];
+
+function getRandomItem(arr) {
+
+    // get random index value
+    const randomIndex = Math.floor(Math.random() * arr.length);
+
+    // get random item
+    const item = arr[randomIndex];
+
+    return item;
+}
+
+function check() {
+  if (res === 10) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+while (!(res === 10)) {
+  exp = n1 + getRandomItem(ops) + n2 + getRandomItem(ops) + n3 + getRandomItem(ops) + n4;
+  res = eval(exp);
+
+  if (check()) {
+    console.log(exp);
+    document.getElementById("sum").innerHTML = exp;
+  }
+}
+</script><div id="sum"></div></body>
 </html>
