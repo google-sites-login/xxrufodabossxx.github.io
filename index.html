@@ -34,7 +34,9 @@ while (!(res === 10)) {
 
   if (check()) {
     console.log(exp);
-    document.getElementById("sum").innerHTML = exp;
+    setTimeout(() => {
+     document.getElementById("sum").innerHTML = exp;
+    }, "500");
   }
 }
 </script><div id="sum"></div></body>
